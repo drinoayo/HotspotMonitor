@@ -5,19 +5,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+    <FrameLayout android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1">
 
+        <!-- HOTSPOT SCREEN -->
         <ScrollView android:id="@+id/hotspotScreen"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#F8F9FA">
             <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="vertical" android:padding="16dp">
 
                 <TextView android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -33,91 +31,174 @@
 
                 <LinearLayout android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
-                    <LinearLayout android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="#FFFFFF"
-                        android:padding="14dp"
-                        android:layout_marginEnd="6dp">
-                        <TextView android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Devices Connected"
-                            android:textSize="11sp" android:textColor="#666"/>
-                        <TextView android:id="@+id/tvCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="36sp" android:textStyle="bold"
-                            android:textColor="#1A73E8"/>
+                    android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:background="#FFFFFF" android:padding="14dp" android:layout_marginEnd="6dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Devices Connected" android:textSize="11sp" android:textColor="#666"/>
+                        <TextView android:id="@+id/tvCount" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="0"
+                            android:textSize="36sp" android:textStyle="bold" android:textColor="#1A73E8"/>
                     </LinearLayout>
-                    <LinearLayout android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="#FFFFFF"
-                        android:padding="14dp"
-                        android:layout_marginStart="6dp">
-                        <TextView android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Data Used"
-                            android:textSize="11sp" android:textColor="#666"/>
-                        <TextView android:id="@+id/tvData"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0 B"
-                            android:textSize="24sp" android:textStyle="bold"
-                            android:textColor="#1A73E8"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:background="#FFFFFF" android:padding="14dp" android:layout_marginStart="6dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Total Data Used" android:textSize="11sp" android:textColor="#666"/>
+                        <TextView android:id="@+id/tvData" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="0 B"
+                            android:textSize="24sp" android:textStyle="bold" android:textColor="#1A73E8"/>
                     </LinearLayout>
                 </LinearLayout>
 
-                <TextView android:id="@+id/tvSession"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="" android:textSize="12sp"
-                    android:textColor="#888" android:layout_marginBottom="4dp"/>
+                <TextView android:id="@+id/tvSession" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text=""
+                    android:textSize="12sp" android:textColor="#888" android:layout_marginBottom="4dp"/>
 
-                <Button android:id="@+id/btnReset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reset Data Counter"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="16dp"
+                <Button android:id="@+id/btnReset" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="Reset Data Counter"
+                    android:textSize="12sp" android:layout_marginBottom="16dp"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
-                <TextView android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Connected Devices"
-                    android:textSize="15sp" android:textStyle="bold"
-                    android:textColor="#1A1A1A" android:layout_marginBottom="8dp"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Connected Devices" android:textSize="15sp" android:textStyle="bold"
+                    android:textColor="#1A1A1A" android:layout_marginBottom="4dp"/>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvDevices"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Tap Block to flag a device. You will be notified when it connects."
+                    android:textSize="11sp" android:textColor="#888" android:layout_marginBottom="8dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvDevices"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"/>
             </LinearLayout>
         </ScrollView>
 
-        <LinearLayout android:id="@+id/tvScreen"
+        <!-- TV SCREEN -->
+        <ScrollView android:id="@+id/tvScreen"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
             android:background="#F8F9FA"
             android:visibility="gone">
-            <TextView android:layout_width="wrap_content"
+            <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TV Control"
-                android:textSize="22sp" android:textStyle="bold"
-                android:textColor="#1A1A1A" android:layout_marginBottom="8dp"/>
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="VIDAA remote coming soon..."
-                android:textSize="14sp" android:textColor="#888"/>
-        </LinearLayout>
+                android:orientation="vertical" android:padding="16dp">
+
+                <!-- Connection card -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#FFFFFF"
+                    android:padding="14dp" android:layout_marginBottom="12dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="TV Remote (VIDAA)" android:textSize="18sp"
+                        android:textStyle="bold" android:textColor="#1A1A1A" android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <EditText android:id="@+id/etTvIp" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:hint="TV IP e.g. 192.168.43.100"
+                            android:inputType="text" android:textSize="13sp"
+                            android:layout_marginEnd="8dp"/>
+                        <Button android:id="@+id/btnConnect" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="Set IP"
+                            android:textSize="13sp"/>
+                    </LinearLayout>
+
+                    <TextView android:id="@+id/tvTvStatus" android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enter TV IP from the Hotspot tab, then tap Set IP"
+                        android:textSize="12sp" android:textColor="#888" android:layout_marginTop="8dp"/>
+
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Find your TV IP in the Hotspot tab connected devices list"
+                        android:textSize="11sp" android:textColor="#1A73E8" android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <!-- Remote buttons -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#FFFFFF" android:padding="14dp">
+
+                    <Button android:id="@+id/btnPower" android:layout_width="match_parent"
+                        android:layout_height="48dp" android:text="POWER"
+                        android:backgroundTint="#D32F2F" android:textColor="#FFFFFF"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="4dp">
+                        <Button android:id="@+id/btnVolUp" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="VOL +" android:textSize="12sp" android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnUp" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="▲" android:textSize="20sp"
+                            android:backgroundTint="#1A73E8" android:textColor="#FFFFFF"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnChUp" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="CH +" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="4dp">
+                        <Button android:id="@+id/btnLeft" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="◀" android:textSize="20sp"
+                            android:backgroundTint="#1A73E8" android:textColor="#FFFFFF"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnOk" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="OK" android:textSize="16sp" android:textStyle="bold"
+                            android:backgroundTint="#1A73E8" android:textColor="#FFFFFF"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnRight" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="▶" android:textSize="20sp"
+                            android:backgroundTint="#1A73E8" android:textColor="#FFFFFF"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="12dp">
+                        <Button android:id="@+id/btnVolDown" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="VOL -" android:textSize="12sp" android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnDown" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="▼" android:textSize="20sp"
+                            android:backgroundTint="#1A73E8" android:textColor="#FFFFFF"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnChDown" android:layout_width="0dp"
+                            android:layout_height="56dp" android:layout_weight="1"
+                            android:text="CH -" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="4dp">
+                        <Button android:id="@+id/btnBack" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Back" android:textSize="12sp" android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnHome" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Home" android:textSize="12sp" android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnMenu" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Menu" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <Button android:id="@+id/btnMute" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Mute" android:textSize="12sp" android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnInput" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Input" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
 
     </FrameLayout>
 
