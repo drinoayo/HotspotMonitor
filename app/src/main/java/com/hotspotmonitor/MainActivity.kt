@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         blockedMacs = prefs.getStringSet("blocked_macs", mutableSetOf())!!.toMutableSet()
         knownMacs = prefs.getStringSet("known_macs", mutableSetOf())!!.toMutableSet()
         tvIp = prefs.getString("tv_ip", null)
-        tvIp?.let { vidaa = VidaaTv(it) }
+        tvIp?.let { vidaa = VidaaTv(it, applicationContext) }
 
         setupNotifChannel()
         setupViews()
@@ -101,7 +101,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupNotifChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val ch = NotificationChannel("hm_ch", "Hotspot Alerts", NotificationManager.IMPORTANCE_DEFAULT)
+            val ch = NotificationChannel(
+                "hm_ch", "Hotspot Alerts",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             ch.description = "Device connection alerts"
             getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
         }
@@ -121,25 +124,28 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btnReset).setOnClickListener { resetCounter() }
 
-        // TV IP + Pairing
         val etIp = findViewById<EditText>(R.id.etTvIp)
         val etPin = findViewById<EditText>(R.id.etPin)
         tvIp?.let { etIp.setText(it) }
 
         findViewById<Button>(R.id.btnConnect).setOnClickListener {
             val ip = etIp.text.toString().trim()
-            if (ip.isEmpty()) { Toast.makeText(this, "Enter TV IP first", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            if (ip.isEmpty()) {
+                Toast.makeText(this, "Enter TV IP first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             tvIp = ip
-            vidaa = VidaaTv(ip)
+            vidaa = VidaaTv(ip, applicationContext)
             prefs.edit().putString("tv_ip", ip).apply()
-            tvTvStatus.text = "Connecting to $ip — a PIN should appear on your TV..."
+            tvTvStatus.text = "Connecting to $ip..."
             tvTvStatus.setTextColor(0xFF1A73E8.toInt())
-            // Try a connection — TV shows PIN prompt if not yet paired
             Thread {
                 val ok = vidaa!!.sendKey("KEY_NULL")
                 handler.post {
-                    tvTvStatus.text = if (ok) "✓ Connected! No PIN needed — remote is ready."
-                    else "TV found. If a PIN appeared on screen, enter it below and tap Send PIN."
+                    tvTvStatus.text = if (ok)
+                        "✓ Connected! No PIN needed — remote is ready."
+                    else
+                        "TV found. If a PIN appeared on screen, enter it below and tap Send PIN."
                     tvTvStatus.setTextColor(if (ok) 0xFF0F9D58.toInt() else 0xFF1A73E8.toInt())
                 }
             }.start()
@@ -147,28 +153,41 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnSendPin).setOnClickListener {
             val pin = etPin.text.toString().trim()
-            if (pin.length != 4) { Toast.makeText(this, "PIN must be 4 digits", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
-            val v = vidaa ?: run { Toast.makeText(this, "Set TV IP first", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            if (pin.length != 4) {
+                Toast.makeText(this, "PIN must be 4 digits", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val v = vidaa ?: run {
+                Toast.makeText(this, "Set TV IP first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             tvTvStatus.text = "Sending PIN..."
             tvTvStatus.setTextColor(0xFF888888.toInt())
             Thread {
                 val ok = v.sendAuth(pin)
                 handler.post {
-                    tvTvStatus.text = if (ok) "✓ Paired! Remote buttons now work." else "✗ PIN failed — check and try again"
+                    tvTvStatus.text = if (ok) "✓ Paired! Remote buttons now work."
+                    else "✗ PIN failed — check and try again"
                     tvTvStatus.setTextColor(if (ok) 0xFF0F9D58.toInt() else 0xFFD32F2F.toInt())
                 }
             }.start()
         }
 
-        // Remote key buttons
         val keys = mapOf(
-            R.id.btnPower to "KEY_POWER", R.id.btnVolUp to "KEY_VOLUMEUP",
-            R.id.btnVolDown to "KEY_VOLUMEDOWN", R.id.btnMute to "KEY_MUTE",
-            R.id.btnChUp to "KEY_CHANNELUP", R.id.btnChDown to "KEY_CHANNELDOWN",
-            R.id.btnUp to "KEY_UP", R.id.btnDown to "KEY_DOWN",
-            R.id.btnLeft to "KEY_LEFT", R.id.btnRight to "KEY_RIGHT",
-            R.id.btnOk to "KEY_OK", R.id.btnBack to "KEY_BACK",
-            R.id.btnHome to "KEY_HOME", R.id.btnMenu to "KEY_MENU",
+            R.id.btnPower to "KEY_POWER",
+            R.id.btnVolUp to "KEY_VOLUMEUP",
+            R.id.btnVolDown to "KEY_VOLUMEDOWN",
+            R.id.btnMute to "KEY_MUTE",
+            R.id.btnChUp to "KEY_CHANNELUP",
+            R.id.btnChDown to "KEY_CHANNELDOWN",
+            R.id.btnUp to "KEY_UP",
+            R.id.btnDown to "KEY_DOWN",
+            R.id.btnLeft to "KEY_LEFT",
+            R.id.btnRight to "KEY_RIGHT",
+            R.id.btnOk to "KEY_OK",
+            R.id.btnBack to "KEY_BACK",
+            R.id.btnHome to "KEY_HOME",
+            R.id.btnMenu to "KEY_MENU",
             R.id.btnInput to "KEY_SOURCES"
         )
         keys.forEach { (id, key) ->
@@ -179,8 +198,16 @@ class MainActivity : AppCompatActivity() {
         val tv = findViewById<View>(R.id.tvScreen)
         findViewById<BottomNavigationView>(R.id.bottomNav).setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.nav_hotspot -> { hotspot.visibility = View.VISIBLE; tv.visibility = View.GONE; true }
-                R.id.nav_tv -> { hotspot.visibility = View.GONE; tv.visibility = View.VISIBLE; true }
+                R.id.nav_hotspot -> {
+                    hotspot.visibility = View.VISIBLE
+                    tv.visibility = View.GONE
+                    true
+                }
+                R.id.nav_tv -> {
+                    hotspot.visibility = View.GONE
+                    tv.visibility = View.VISIBLE
+                    true
+                }
                 else -> false
             }
         }
@@ -188,14 +215,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendTvKey(key: String) {
         val v = vidaa ?: run {
-            Toast.makeText(this, "Enter TV IP first and tap Pair TV", Toast.LENGTH_SHORT).show(); return
+            Toast.makeText(this, "Enter TV IP first and tap Pair TV", Toast.LENGTH_SHORT).show()
+            return
         }
         tvTvStatus.text = "Sending $key..."
         tvTvStatus.setTextColor(0xFF888888.toInt())
         Thread {
             val ok = v.sendKey(key)
             handler.post {
-                tvTvStatus.text = if (ok) "✓ $key sent" else "✗ No response — is TV on the hotspot?"
+                tvTvStatus.text = if (ok) "✓ $key sent"
+                else "✗ No response — is TV on the hotspot?"
                 tvTvStatus.setTextColor(if (ok) 0xFF0F9D58.toInt() else 0xFFD32F2F.toInt())
             }
         }.start()
@@ -204,7 +233,9 @@ class MainActivity : AppCompatActivity() {
     private fun askPermissions() {
         val p = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (Build.VERSION.SDK_INT >= 33) p.add(Manifest.permission.POST_NOTIFICATIONS)
-        val need = p.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        val need = p.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
         if (need.isNotEmpty()) ActivityCompat.requestPermissions(this, need.toTypedArray(), 1)
     }
 
@@ -214,13 +245,20 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "${d.name} unblocked", Toast.LENGTH_SHORT).show()
         } else {
             blockedMacs.add(d.mac)
-            Toast.makeText(this, "Blocked! Change hotspot password to disconnect ${d.name}.", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                "Blocked! Change hotspot password to disconnect ${d.name}.",
+                Toast.LENGTH_LONG
+            ).show()
         }
         prefs.edit().putStringSet("blocked_macs", blockedMacs).apply()
         adapter.notifyDataSetChanged()
     }
 
-    override fun onDestroy() { super.onDestroy(); handler.removeCallbacks(ticker) }
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(ticker)
+    }
 
     private fun resetCounter() {
         startBytes = TrafficStats.getMobileTxBytes() + TrafficStats.getMobileRxBytes()
@@ -232,18 +270,72 @@ class MainActivity : AppCompatActivity() {
         val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val on = try {
             val m = wm.javaClass.getDeclaredMethod("isWifiApEnabled")
-            m.isAccessible = true; m.invoke(wm) as Boolean
+            m.isAccessible = true
+            m.invoke(wm) as Boolean
         } catch (e: Exception) { false }
+
         tvStatus.text = if (on) "● Hotspot is ACTIVE" else "● Hotspot is OFF"
         tvStatus.setTextColor(if (on) 0xFF0F9D58.toInt() else 0xFFDB4437.toInt())
+
         val devices = arpTable()
         alertNewAndBlocked(devices)
         tvCount.text = "${devices.size}"
         adapter.update(devices)
+
         val used = (TrafficStats.getMobileTxBytes() + TrafficStats.getMobileRxBytes()) - startBytes
         tvData.text = fmt(if (used < 0) 0L else used)
+
         val mins = ((System.currentTimeMillis() - startTime) / 60000).toInt()
-        tvSession.text = if (mins < 60) "Session: ${mins}m" else "Session: ${mins / 60}h ${mins % 60}m"
+        tvSession.text = if (mins < 60) "Session: ${mins}m"
+        else "Session: ${mins / 60}h ${mins % 60}m"
+    }
+
+    private fun arpTable(): List<DeviceInfo> {
+        val r = mutableListOf<DeviceInfo>()
+
+        // Actively ping subnet to populate ARP table
+        val myIp = getHotspotIp()
+        if (myIp != null) {
+            val subnet = myIp.substringBeforeLast(".")
+            for (i in 1..30) {
+                Thread {
+                    try {
+                        InetAddress.getByName("$subnet.$i").isReachable(500)
+                    } catch (_: Exception) {}
+                }.start()
+            }
+            Thread.sleep(800)
+        }
+
+        try {
+            val br = BufferedReader(FileReader("/proc/net/arp"))
+            br.readLine()
+            var l: String?
+            while (br.readLine().also { l = it } != null) {
+                val p = l!!.trim().split("\\s+".toRegex())
+                if (p.size >= 4) {
+                    val ip = p[0]; val mac = p[3]
+                    if (mac.length >= 11 && mac != "00:00:00:00:00:00") {
+                        val hostname = try {
+                            val h = InetAddress.getByName(ip).hostName
+                            if (h == ip) "Device ($ip)" else h
+                        } catch (e: Exception) { "Device ($ip)" }
+                        r.add(DeviceInfo(ip, mac, hostname))
+                    }
+                }
+            }
+            br.close()
+        } catch (_: Exception) {}
+        return r
+    }
+
+    private fun getHotspotIp(): String? {
+        for (ip in listOf("10.14.28.197", "192.168.43.1", "192.168.49.1", "192.168.1.1")) {
+            try {
+                if (InetAddress.getByName(ip).isReachable(300)) return ip
+            } catch (_: Exception) {}
+        }
+        return null
     }
 
     private fun alertNewAndBlocked(devices: List<DeviceInfo>) {
@@ -254,37 +346,35 @@ class MainActivity : AppCompatActivity() {
                 sendNotif("New device joined hotspot", "${d.name} — ${d.ip}", d.mac.hashCode())
             }
             if (blockedMacs.contains(d.mac))
-                sendNotif("Blocked device detected!", "${d.name} is on your hotspot. Change password to remove.", d.mac.hashCode() + 9999)
+                sendNotif(
+                    "Blocked device detected!",
+                    "${d.name} is on your hotspot. Change password to remove.",
+                    d.mac.hashCode() + 9999
+                )
         }
     }
 
     private fun sendNotif(title: String, text: String, id: Int) {
-        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this,
-                Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        NotificationManagerCompat.from(this).notify(id,
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) return
+        NotificationManagerCompat.from(this).notify(
+            id,
             NotificationCompat.Builder(this, "hm_ch")
-                .setSmallIcon(R.drawable.ic_notification).setContentTitle(title)
-                .setContentText(text).setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true).build())
-    }
-
-    private fun arpTable(): List<DeviceInfo> {
-        val r = mutableListOf<DeviceInfo>()
-        try {
-            val br = BufferedReader(FileReader("/proc/net/arp"))
-            br.readLine(); var l: String?
-            while (br.readLine().also { l = it } != null) {
-                val p = l!!.trim().split("\\s+".toRegex())
-                if (p.size >= 4 && p[3] != "00:00:00:00:00:00" && !p[3].startsWith("00:00"))
-                    r.add(DeviceInfo(p[0], p[3], try { InetAddress.getByName(p[0]).hostName } catch (e: Exception) { p[0] }))
-            }
-            br.close()
-        } catch (_: Exception) {}
-        return r
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .build()
+        )
     }
 
     private fun fmt(b: Long) = when {
-        b < 1024 -> "$b B"; b < 1048576 -> "${b / 1024} KB"
-        b < 1073741824 -> "${b / 1048576} MB"; else -> "${b / 1073741824} GB"
+        b < 1024 -> "$b B"
+        b < 1048576 -> "${b / 1024} KB"
+        b < 1073741824 -> "${b / 1048576} MB"
+        else -> "${b / 1073741824} GB"
     }
 }
