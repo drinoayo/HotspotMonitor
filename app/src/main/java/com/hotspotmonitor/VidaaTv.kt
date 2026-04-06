@@ -3,6 +3,7 @@ package com.hotspotmonitor
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import javax.net.ssl.SSLContext
@@ -18,6 +19,9 @@ class VidaaTv(private val host: String, private val context: Context) {
         private const val CLIENT_ID = "HotspotMonitor"
         private const val USERNAME = "hisenseservice"
         private const val PASSWORD = "multimqttservice"
+        private val HOTSPOT_IPS = listOf(
+            "10.14.28.197", "192.168.43.1", "192.168.49.1", "192.168.1.1"
+        )
     }
 
     fun sendKey(key: String): Boolean {
@@ -31,35 +35,50 @@ class VidaaTv(private val host: String, private val context: Context) {
     }
 
     private fun send(topic: String, payload: String): Boolean {
-        return tryBound(false, topic, payload)
-            || tryBound(true, topic, payload)
+        return tryBindToHotspot(false, topic, payload)
+            || tryBindToHotspot(true, topic, payload)
+            || tryBoundNetwork(topic, payload)
             || tryDirect(false, topic, payload)
             || tryDirect(true, topic, payload)
     }
 
-    private fun tryBound(tls: Boolean, topic: String, payload: String): Boolean {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        for (network in cm.allNetworks) {
-            val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) continue
+    private fun tryBindToHotspot(tls: Boolean, topic: String, payload: String): Boolean {
+        for (localIp in HOTSPOT_IPS) {
             try {
+                val localAddr = InetAddress.getByName(localIp)
                 val socket: Socket = if (tls) {
                     val sc = SSLContext.getInstance("TLS")
                     sc.init(null, arrayOf(TrustAll()), SecureRandom())
                     val s = sc.socketFactory.createSocket() as SSLSocket
-                    network.bindSocket(s)
+                    s.bind(InetSocketAddress(localAddr, 0))
                     s.connect(InetSocketAddress(host, PORT), 4000)
                     s.soTimeout = 4000
                     s.startHandshake()
                     s
                 } else {
                     val s = Socket()
-                    network.bindSocket(s)
+                    s.bind(InetSocketAddress(localAddr, 0))
                     s.connect(InetSocketAddress(host, PORT), 4000)
                     s.soTimeout = 4000
                     s
                 }
                 if (talk(socket, topic, payload)) return true
+            } catch (_: Exception) { continue }
+        }
+        return false
+    }
+
+    private fun tryBoundNetwork(topic: String, payload: String): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        for (network in cm.allNetworks) {
+            val caps = cm.getNetworkCapabilities(network) ?: continue
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) continue
+            try {
+                val s = Socket()
+                network.bindSocket(s)
+                s.connect(InetSocketAddress(host, PORT), 4000)
+                s.soTimeout = 4000
+                if (talk(s, topic, payload)) return true
             } catch (_: Exception) { continue }
         }
         return false
